@@ -1,4 +1,4 @@
-package ie.setu.elaine.data.model
+package ie.setu.elaine.model
 
 import java.util.UUID
 
