@@ -1,6 +1,8 @@
 package ie.setu.elaine.ui.navigation
 
+import android.app.Application
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -11,17 +13,33 @@ import ie.setu.elaine.ui.screen.routine.EditRoutineScreen
 import ie.setu.elaine.ui.screen.routine.RoutineDetailScreen
 import ie.setu.elaine.ui.screen.routine.RoutineListScreen
 import ie.setu.elaine.ui.screen.task.EditTaskScreen
+import ie.setu.elaine.ui.screen.timer.TimerScreen
 import ie.setu.elaine.viewmodel.RoutineViewModel
+import ie.setu.elaine.viewmodel.RoutineViewModelFactory
 
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
-    val viewModel: RoutineViewModel = viewModel()
+    val context = LocalContext.current
+    val viewModel: RoutineViewModel = viewModel(
+        factory = RoutineViewModelFactory(context.applicationContext as Application)
+    )
 
     NavHost(
         navController = navController,
         startDestination = "routineList"
     ) {
+
+        composable("timer") {
+            TimerScreen(
+                viewModel = viewModel,
+                onNavigateBack = {
+                    viewModel.pauseTimer()
+                    navController.popBackStack()
+                }
+            )
+        }
+
         composable("routineList") {
             RoutineListScreen(
                 viewModel = viewModel,
@@ -30,7 +48,7 @@ fun AppNavigation() {
                 },
                 onAddRoutineClick = {
                     navController.navigate("editRoutine")
-                }
+                },
             )
         }
 
@@ -54,7 +72,11 @@ fun AppNavigation() {
                 },
                 onTaskClick = { routineId, taskId ->
                     navController.navigate("editTask/$routineId?taskId=$taskId")
+                },
+                onStartRoutine = {
+                    navController.navigate("timer")
                 }
+
             )
         }
 
@@ -106,5 +128,8 @@ fun AppNavigation() {
                 }
             )
         }
+
+
+
     }
 }

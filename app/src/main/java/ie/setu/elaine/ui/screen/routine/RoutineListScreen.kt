@@ -37,7 +37,7 @@ import ie.setu.elaine.viewmodel.RoutineViewModel
 fun RoutineListScreen(
     viewModel: RoutineViewModel,
     onRoutineClick: (String) -> Unit,
-    onAddRoutineClick: () -> Unit
+    onAddRoutineClick: () -> Unit,
 ) {
     val routines = viewModel.routines
 
@@ -129,4 +129,3 @@ fun RoutineCard(
         }
     }
 }
-//TODO work out previews and viewmodels

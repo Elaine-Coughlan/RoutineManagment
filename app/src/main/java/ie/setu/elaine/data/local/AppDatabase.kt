@@ -9,7 +9,7 @@ import ie.setu.elaine.data.local.dao.TaskDao
 import ie.setu.elaine.data.local.entity.RoutineEntity
 import ie.setu.elaine.data.local.entity.TaskEntity
 
-@Database(entities = [RoutineEntity::class, TaskEntity::class], version = 1)
+@Database(entities = [RoutineEntity::class, TaskEntity::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun routineDao(): RoutineDao
     abstract fun taskDao(): TaskDao
@@ -24,9 +24,11 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "routine_database"
-                ).build()
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
                 INSTANCE = instance
-                instance
+                return instance
             }
         }
     }

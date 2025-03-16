@@ -1,7 +1,6 @@
 package ie.setu.elaine.data.local.dao
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -11,8 +10,14 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface RoutineDao {
-    @Query("SELECT * FROM routine_table ORDER BY title ASC")
-    fun getAllRoutines(): Flow<List<RoutineEntity>>
+    @Query("SELECT * FROM routines")
+    fun getAllRoutinesAsFlow(): Flow<List<RoutineEntity>>
+
+    @Query("SELECT * FROM routines")
+    suspend fun getAllRoutines(): List<RoutineEntity>
+
+    @Query("SELECT * FROM routines WHERE id = :routineId")
+    suspend fun getRoutineById(routineId: String): RoutineEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertRoutine(routine: RoutineEntity)
@@ -20,6 +25,6 @@ interface RoutineDao {
     @Update
     suspend fun updateRoutine(routine: RoutineEntity)
 
-    @Delete
-    suspend fun deleteRoutine(routine: RoutineEntity)
+    @Query("DELETE FROM routines WHERE id = :routineId")
+    suspend fun deleteRoutine(routineId: String)
 }

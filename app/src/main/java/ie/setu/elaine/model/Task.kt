@@ -7,5 +7,8 @@ data class Task(
     val title: String,
     val description: String = "",
     val durationMinutes: Int = 0,
+    val durationInSeconds: Int = 0,
     val isTimerEnabled: Boolean = false
-)
+) {
+
+}

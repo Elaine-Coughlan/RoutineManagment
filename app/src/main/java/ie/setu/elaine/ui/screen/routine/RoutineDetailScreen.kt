@@ -32,6 +32,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.rememberNavController
 import ie.setu.elaine.model.Task
 import ie.setu.elaine.viewmodel.RoutineViewModel
 
@@ -44,9 +45,11 @@ fun RoutineDetailScreen(
     onBack: () -> Unit,
     onEditRoutine: (String) -> Unit,
     onAddTask: (String) -> Unit,
-    onTaskClick: (String, String) -> Unit
+    onTaskClick: (String, String) -> Unit,
+    onStartRoutine: () -> Unit
 ) {
     val routine = viewModel.routines.firstOrNull { it.id == routineId }
+    val navController = rememberNavController()
 
     routine?.let {
         Scaffold(
@@ -105,7 +108,8 @@ fun RoutineDetailScreen(
 
                             if (routine.isTimerEnabled) {
                                 Button(
-                                    onClick = { viewModel.startRoutineTimer(routineId) }
+                                    onClick = { viewModel.startRoutineTimer(routineId)
+                                        onStartRoutine()}
                                 ) {
                                     Icon(Icons.Default.PlayArrow, contentDescription = "Start")
                                     Spacer(modifier = Modifier.width(4.dp))
