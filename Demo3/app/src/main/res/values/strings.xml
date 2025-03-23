@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Demo3</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="add_task">Add Task</string>
+    <string name="set_reminder">Set Reminder</string>
+    <string name="no_tasks_yet">No tasks yet.</string>
+    <string name="enter_task_title">Enter Task Title</string>
+</resources>

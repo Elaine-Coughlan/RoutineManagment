@@ -1,0 +1,11 @@
+<GridView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/gridViewAchievements"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="#F1F8E9"
+    android:numColumns="2"
+    android:verticalSpacing="16dp"
+    android:horizontalSpacing="16dp" />
+
