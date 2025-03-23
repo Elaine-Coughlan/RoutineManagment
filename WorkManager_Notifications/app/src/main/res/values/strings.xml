@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">WorkManager_Notifications</string>
+    <string name="workmanager_test">WorkManager Test</string>
+</resources>
