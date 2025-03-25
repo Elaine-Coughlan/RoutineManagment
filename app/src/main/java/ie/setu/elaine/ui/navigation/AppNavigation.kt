@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import ie.setu.elaine.ui.components.SplashScreen
 import ie.setu.elaine.ui.screen.routine.EditRoutineScreen
 import ie.setu.elaine.ui.screen.routine.RoutineDetailScreen
 import ie.setu.elaine.ui.screen.routine.RoutineListScreen
@@ -27,8 +28,14 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = "routineList"
+        startDestination = "splashScreen"
     ) {
+        composable("splashScreen"){
+            SplashScreen(
+                navController = navController
+
+            )
+        }
 
         composable("timer") {
             TimerScreen(

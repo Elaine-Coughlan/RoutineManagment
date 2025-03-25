@@ -57,13 +57,6 @@ class TaskViewModel : ViewModel() {
         }
     }
 
-    // Functions for timer control
-    fun startRoutineTimer(routineId: String) {
-        //TODO Implementation for starting the routine timer
-    }
 
-    fun startTaskTimer(routineId: String, taskId: String) {
-        //TODO Implementation for starting a task timer
-    }
 
 }

@@ -19,6 +19,13 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    sourceSets{
+        getByName("androidTest"){
+            java.srcDirs("SRC/androidTest/java")
+        }
+    }
+
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -63,4 +70,14 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    //Mockito
+    androidTestImplementation("org.mockito:mockito-core:4.11.0")
+    androidTestImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
+
+
+
+
+
+
 }
