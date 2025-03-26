@@ -19,11 +19,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    sourceSets{
-        getByName("androidTest"){
-            java.srcDirs("SRC/androidTest/java")
-        }
-    }
+
 
 
     buildTypes {
@@ -62,6 +58,8 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     // Room dependencies
     implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.ui.test.junit4.android)
+    androidTestImplementation(libs.androidx.core.testing)
     kapt("androidx.room:room-compiler:2.6.1")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -70,14 +68,9 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
-    //Mockito
-    androidTestImplementation("org.mockito:mockito-core:4.11.0")
-    androidTestImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
-
-
-
-
+    // Compose UI Testing
+    androidTestImplementation (libs.ui.test.junit4)
+    debugImplementation (libs.ui.test.manifest)
 
 
 }

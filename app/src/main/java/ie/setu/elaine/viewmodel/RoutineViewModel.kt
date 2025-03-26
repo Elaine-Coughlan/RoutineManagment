@@ -18,12 +18,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-class RoutineViewModel(application: Application) : AndroidViewModel(application) {
+open class RoutineViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: RoutineRepository
     private val taskRepository: TaskRepository
 
     private val _routines = mutableStateListOf<Routine>()
-    val routines: List<Routine> = _routines
+    open val routines: List<Routine> = _routines
 
     // Current states for editing
     private val _currentRoutine = mutableStateOf<Routine?>(null)
