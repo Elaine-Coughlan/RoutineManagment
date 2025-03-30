@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Call
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ie.setu.elaine.model.Routine
 import ie.setu.elaine.viewmodel.RoutineViewModel
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -126,6 +128,23 @@ fun RoutineCard(
                     }
                 }
             }
+        }
+    }
+
+    // Add to RoutineCard in RoutineListScreen
+    if (routine.hasReminder) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Default.Call, //TODO replace with alarm icon
+                contentDescription = "Reminder",
+                modifier = Modifier.size(16.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = routine.reminderTime?.format(DateTimeFormatter.ofPattern("h:mm a")) ?: "",
+                style = MaterialTheme.typography.labelSmall
+            )
         }
     }
 }

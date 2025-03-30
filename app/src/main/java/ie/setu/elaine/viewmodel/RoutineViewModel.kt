@@ -11,19 +11,22 @@ import androidx.lifecycle.viewModelScope
 import ie.setu.elaine.data.local.AppDatabase
 import ie.setu.elaine.data.repository.RoutineRepository
 import ie.setu.elaine.data.repository.TaskRepository
+import ie.setu.elaine.model.NotificationType
 import ie.setu.elaine.model.Routine
 import ie.setu.elaine.model.Task
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.time.DayOfWeek
+import java.time.LocalTime
 
 open class RoutineViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: RoutineRepository
     private val taskRepository: TaskRepository
 
     private val _routines = mutableStateListOf<Routine>()
-    open val routines: List<Routine> = _routines
+    var routines: List<Routine> = _routines
 
     // Current states for editing
     private val _currentRoutine = mutableStateOf<Routine?>(null)
@@ -272,6 +275,53 @@ open class RoutineViewModel(application: Application) : AndroidViewModel(applica
         routineTimerJob?.cancel()
         taskTimerJob?.cancel()
     }
+
+   //Handling reminders
+   fun updateRoutineReminder(
+       routineId: String,
+       hasReminder: Boolean,
+       reminderTime: LocalTime? = null,
+       reminderDays: List<DayOfWeek> = emptyList(),
+       notificationType: NotificationType = NotificationType.STANDARD
+   ) {
+       routines = routines.map { routine ->
+           if (routine.id == routineId) {
+               routine.copy(
+                   hasReminder = hasReminder,
+                   reminderTime = reminderTime,
+                   reminderDays = reminderDays,
+                   notificationType = notificationType
+               )
+           } else routine
+       }
+   }
+
+    //Help to interact with Reminder viewModel
+    fun syncReminderWithRoutine(
+        routineId: String,
+        reminderViewModel: ReminderViewModel
+    ) {
+        val routine = routines.firstOrNull { it.id == routineId } ?: return
+
+        if (routine.hasReminder && routine.reminderTime != null) {
+            // Create or update reminder
+            reminderViewModel.createReminder(
+                title = routine.title,
+                description = "Routine: ${routine.title}",
+                time = routine.reminderTime,
+                repeatDays = routine.reminderDays,
+                routineId = routineId
+                // notificationType parameter will be added in ReminderViewModel update
+            )
+        } else {
+            // If routine exists in the reminders list
+            val existingReminder = reminderViewModel.reminders.value.firstOrNull { it.routineId == routineId }
+            if (existingReminder != null) {
+                reminderViewModel.deleteReminder(existingReminder.id)
+            }
+        }
+    }
+
 }
 
 class RoutineViewModelFactory(private val application: Application) : ViewModelProvider.Factory {

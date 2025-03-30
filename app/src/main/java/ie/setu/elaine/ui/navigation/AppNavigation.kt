@@ -9,12 +9,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import ie.setu.elaine.service.ReminderService
 import ie.setu.elaine.ui.components.SplashScreen
 import ie.setu.elaine.ui.screen.routine.EditRoutineScreen
 import ie.setu.elaine.ui.screen.routine.RoutineDetailScreen
 import ie.setu.elaine.ui.screen.routine.RoutineListScreen
 import ie.setu.elaine.ui.screen.task.EditTaskScreen
 import ie.setu.elaine.ui.screen.timer.TimerScreen
+import ie.setu.elaine.viewmodel.ReminderViewModel
+import ie.setu.elaine.viewmodel.ReminderViewModelFactory
 import ie.setu.elaine.viewmodel.RoutineViewModel
 import ie.setu.elaine.viewmodel.RoutineViewModelFactory
 
@@ -22,8 +25,12 @@ import ie.setu.elaine.viewmodel.RoutineViewModelFactory
 fun AppNavigation() {
     val navController = rememberNavController()
     val context = LocalContext.current
+    val reminderService = ReminderService(context.applicationContext)
     val viewModel: RoutineViewModel = viewModel(
         factory = RoutineViewModelFactory(context.applicationContext as Application)
+    )
+    val reminderViewmodel : ReminderViewModel = viewModel(
+        factory = ReminderViewModelFactory(context.applicationContext as Application, reminderService)
     )
 
     NavHost(
@@ -105,7 +112,8 @@ fun AppNavigation() {
                 },
                 onCancel = {
                     navController.popBackStack()
-                }
+                },
+                reminderViewModel = reminderViewmodel,
             )
         }
 

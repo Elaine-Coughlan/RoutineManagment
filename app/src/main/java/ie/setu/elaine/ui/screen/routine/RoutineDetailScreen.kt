@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
@@ -35,6 +36,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import ie.setu.elaine.model.Task
 import ie.setu.elaine.viewmodel.RoutineViewModel
+import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
+import java.util.Locale
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -115,6 +119,35 @@ fun RoutineDetailScreen(
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text("Start Routine")
                                 }
+                            }
+
+                            // Add to the routine summary card in RoutineDetailScreen
+                            if (routine.hasReminder) {
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Call, //TODO replace with Alarm icon
+                                        contentDescription = "Reminder",
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = "Reminder: ${routine.reminderTime?.format(
+                                            DateTimeFormatter.ofPattern("hh:mm a"))}",
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+
+                                // Display which days the reminder repeats
+                                Text(
+                                    text = "Repeats on: ${routine.reminderDays.joinToString(", ") {
+                                        it.getDisplayName(TextStyle.SHORT, Locale.getDefault())
+                                    }}",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
                             }
                         }
                     }
