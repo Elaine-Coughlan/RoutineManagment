@@ -56,6 +56,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.room.common)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.work.runtime)
     // Room dependencies
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.ui.test.junit4.android)
