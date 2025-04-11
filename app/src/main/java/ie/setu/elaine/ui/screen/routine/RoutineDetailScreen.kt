@@ -31,11 +31,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import ie.setu.elaine.model.Task
 import ie.setu.elaine.viewmodel.RoutineViewModel
-
+import ie.setu.elaine.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -197,7 +198,7 @@ fun TaskItem(
                         modifier = Modifier.size(32.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Edit,  //TODO add timer icon
+                            painter = painterResource(R.drawable.sand_clock_1_),
                             contentDescription = "Start Timer",
                             tint = MaterialTheme.colorScheme.primary
                         )

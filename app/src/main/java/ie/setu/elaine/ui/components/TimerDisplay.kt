@@ -1,5 +1,6 @@
 package ie.setu.elaine.ui.components
 
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,10 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -22,8 +19,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import ie.setu.elaine.R
 
 @Composable
 fun TimerDisplay(
@@ -35,6 +34,8 @@ fun TimerDisplay(
 ) {
     val minutes = timeInSeconds / 60
     val seconds = timeInSeconds % 60
+
+    val iconRes = if (isRunning) R.drawable.video_pause_button else R.drawable.video_play_button
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -63,7 +64,7 @@ fun TimerDisplay(
                     )
                 ) {
                     Icon(
-                        imageVector = if (isRunning) Icons.Default.KeyboardArrowUp else Icons.Default.PlayArrow, //TODO need pause icon to replace keyboardarrowup
+                        painter = painterResource(id = iconRes),
                         contentDescription = if (isRunning) "Pause" else "Start"
                     )
                     Spacer(modifier = Modifier.width(4.dp))
@@ -76,7 +77,7 @@ fun TimerDisplay(
                         containerColor = MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Icon(Icons.Default.Clear, contentDescription = "Stop") //TODO create stop icon
+                    Icon(painter = painterResource(R.drawable.stop_button), contentDescription = "Stop")
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("Stop")
                 }

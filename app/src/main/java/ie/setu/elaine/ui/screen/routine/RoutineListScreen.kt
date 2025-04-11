@@ -28,9 +28,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import ie.setu.elaine.model.Routine
 import ie.setu.elaine.viewmodel.RoutineViewModel
+import ie.setu.elaine.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -113,7 +115,7 @@ fun RoutineCard(
                 if (routine.isTimerEnabled) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            imageVector = Icons.Default.Add, //TODO change to Icons.Default.Timer once created icon
+                            painter = painterResource(R.drawable.sand_clock),
                             contentDescription = "Timer",
                             modifier = Modifier.size(16.dp),
                             tint = MaterialTheme.colorScheme.primary

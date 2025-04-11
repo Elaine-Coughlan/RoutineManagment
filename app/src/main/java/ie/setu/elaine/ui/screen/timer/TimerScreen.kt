@@ -26,8 +26,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import ie.setu.elaine.R
 import ie.setu.elaine.viewmodel.RoutineViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,6 +45,9 @@ fun TimerScreen(
 
     val minutes = taskTimeRemaining / 60
     val seconds = taskTimeRemaining % 60
+
+    val iconRes = if (isTaskTimerRunning) R.drawable.video_pause_button else R.drawable.video_play_button
+
 
     Scaffold(
         topBar = {
@@ -98,7 +103,7 @@ fun TimerScreen(
                     modifier = Modifier.size(64.dp)
                 ) {
                     Icon(
-                        imageVector = if (isTaskTimerRunning) Icons.Default.KeyboardArrowUp else Icons.Default.PlayArrow,//TODO replace arrowUP with pause icon
+                        painter = painterResource(id = iconRes),
                         contentDescription = if (isTaskTimerRunning) "Pause" else "Play",
                         modifier = Modifier.size(48.dp)
                     )
