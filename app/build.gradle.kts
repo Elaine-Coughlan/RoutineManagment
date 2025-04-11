@@ -63,13 +63,16 @@ dependencies {
     androidTestImplementation(libs.androidx.core.testing)
     kapt("androidx.room:room-compiler:2.6.1")
     testImplementation(libs.junit)
+    testImplementation (libs.androidx.work.testing)
+    testImplementation (libs.androidx.core)
+    testImplementation (libs.mockito.core)
+    testImplementation (libs.robolectric.robolectric)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    // Compose UI Testing
     androidTestImplementation (libs.ui.test.junit4)
     debugImplementation (libs.ui.test.manifest)
 
