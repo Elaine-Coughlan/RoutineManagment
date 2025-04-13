@@ -40,6 +40,7 @@ fun RoutineListScreen(
     viewModel: RoutineViewModel,
     onRoutineClick: (String) -> Unit,
     onAddRoutineClick: () -> Unit,
+    onAchievementsClick: () -> Unit,
 ) {
     val routines = viewModel.routines
 
@@ -50,6 +51,13 @@ fun RoutineListScreen(
                 actions = {
                     IconButton(onClick = onAddRoutineClick) {
                         Icon(Icons.Default.Add, contentDescription = "Add Routine")
+                    }
+
+                    IconButton(onClick = onAchievementsClick) {
+                        Icon(
+                            painter = painterResource(R.drawable.outline_trophy_24),
+                            contentDescription = "Achievements"
+                        )
                     }
                 }
             )

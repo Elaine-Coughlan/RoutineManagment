@@ -46,7 +46,7 @@ class NotificationHelper(private val context: Context) {
         )
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_notification) // Make sure you have this drawable
+            .setSmallIcon(R.drawable.notification)
             .setContentTitle("Daily Routine Reminder")
             .setContentText("Don't forget to check your routines today!")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)

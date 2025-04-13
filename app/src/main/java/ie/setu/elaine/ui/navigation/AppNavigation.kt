@@ -10,6 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import ie.setu.elaine.ui.components.SplashScreen
+import ie.setu.elaine.ui.screen.achievement.AchievementScreen
 import ie.setu.elaine.ui.screen.routine.EditRoutineScreen
 import ie.setu.elaine.ui.screen.routine.RoutineDetailScreen
 import ie.setu.elaine.ui.screen.routine.RoutineListScreen
@@ -56,6 +57,10 @@ fun AppNavigation() {
                 onAddRoutineClick = {
                     navController.navigate("editRoutine")
                 },
+
+                onAchievementsClick = {
+                    navController.navigate("achievements")
+                }
             )
         }
 
@@ -131,6 +136,15 @@ fun AppNavigation() {
                     navController.popBackStack()
                 },
                 onCancel = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable("achievements") {
+            AchievementScreen(
+                viewModel = viewModel,
+                onNavigateBack = {
                     navController.popBackStack()
                 }
             )
