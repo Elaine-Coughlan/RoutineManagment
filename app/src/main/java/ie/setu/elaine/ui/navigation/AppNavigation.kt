@@ -16,6 +16,8 @@ import ie.setu.elaine.ui.screen.routine.RoutineDetailScreen
 import ie.setu.elaine.ui.screen.routine.RoutineListScreen
 import ie.setu.elaine.ui.screen.task.EditTaskScreen
 import ie.setu.elaine.ui.screen.timer.TimerScreen
+import ie.setu.elaine.viewmodel.AchievementViewModel
+import ie.setu.elaine.viewmodel.AchievementViewModelFactory
 import ie.setu.elaine.viewmodel.RoutineViewModel
 import ie.setu.elaine.viewmodel.RoutineViewModelFactory
 
@@ -26,6 +28,10 @@ fun AppNavigation() {
     val viewModel: RoutineViewModel = viewModel(
         factory = RoutineViewModelFactory(context.applicationContext as Application)
     )
+    val achievementViewModel: AchievementViewModel = viewModel(
+        factory = AchievementViewModelFactory(context.applicationContext as Application)
+    )
+
 
     NavHost(
         navController = navController,
@@ -143,7 +149,7 @@ fun AppNavigation() {
 
         composable("achievements") {
             AchievementScreen(
-                viewModel = viewModel,
+                viewModel = achievementViewModel,
                 onNavigateBack = {
                     navController.popBackStack()
                 }
