@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import ie.setu.elaine.data.local.entity.RoutineEntity
 import ie.setu.elaine.data.local.entity.TaskEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -31,4 +32,7 @@ interface TaskDao {
 
     @Query("DELETE FROM tasks WHERE routineId = :routineId")
     suspend fun deleteTasksForRoutine(routineId: String)
+
+    @Query("SELECT * FROM tasks")
+    fun getAllTasks(): Flow<List<TaskEntity>>
 }

@@ -23,18 +23,6 @@ class AchievementRepository(private val achievementDao: AchievementDao) {
                 description = "Completed 10 tasks",
                 isUnlocked = false
             ),
-            Achievement(
-                id = "consistency",
-                title = "Consistency",
-                description = "Used the app for 7 days in a row",
-                isUnlocked = false
-            ),
-            Achievement(
-                id = "time_keeper",
-                title = "Time Keeper",
-                description = "Completed a timed routine",
-                isUnlocked = false
-            ),
 
             Achievement(
                 id = "organisation_pro",
@@ -53,12 +41,33 @@ class AchievementRepository(private val achievementDao: AchievementDao) {
         }
     }
 
-    suspend fun unlockAchievement(id: String){
-        achievementDao.updateAchievementStatus(
-            id = id,
-            isUnlocked = true,
-            unlockedDate = System.currentTimeMillis()
-        )
+    suspend fun checkFirstRoutineAchievement(routineCount: Int){
+        if (routineCount >= 1) {
+            unlockAchievement("first_routine")
+        }
+    }
+
+    suspend fun checkOrganizationProAchievement(routineCount: Int) {
+        if (routineCount >= 5) {
+            unlockAchievement("organization_pro")
+        }
+    }
+    suspend fun checkConsistencyAchievement(consecutiveDays: Int) {
+        if (consecutiveDays >= 7) {
+            unlockAchievement("consistency")
+        }
+    }
+
+
+    suspend fun unlockAchievement(id: String) {
+        val achievement = achievementDao.getAchievementById(id) ?: return
+        if (!achievement.isUnlocked) {
+            achievementDao.updateAchievementStatus(
+                id = id,
+                isUnlocked = true,
+                unlockedDate = System.currentTimeMillis()
+            )
+        }
     }
 
     suspend fun checkAndUpdateAchievements(
@@ -67,6 +76,7 @@ class AchievementRepository(private val achievementDao: AchievementDao) {
         hasDoneTimedRoutine: Boolean,
         consecutiveDays: Int
     ) {
+        // Check and update achievements based on criteria
         if (routineCount >= 1) {
             unlockAchievement("first_routine")
         }
@@ -75,16 +85,11 @@ class AchievementRepository(private val achievementDao: AchievementDao) {
             unlockAchievement("organization_pro")
         }
 
-        if (taskCompletedCount >= 10) {
-            unlockAchievement("task_master")
-        }
-
-        if (hasDoneTimedRoutine) {
-            unlockAchievement("time_keeper")
-        }
 
         if (consecutiveDays >= 7) {
             unlockAchievement("consistency")
         }
     }
+
+
 }

@@ -1,18 +1,24 @@
 // RoutineRepository.kt
 package ie.setu.elaine.data.repository
 
+import android.app.Application
+import android.content.Context
+import ie.setu.elaine.RMApplication
 import ie.setu.elaine.data.local.dao.RoutineDao
 import ie.setu.elaine.data.local.dao.TaskDao
 import ie.setu.elaine.data.local.entity.RoutineEntity
 import ie.setu.elaine.data.local.entity.TaskEntity
 import ie.setu.elaine.model.Routine
 import ie.setu.elaine.model.Task
+import ie.setu.elaine.notifications.ReminderManager
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 class RoutineRepository(
     private val routineDao: RoutineDao,
-    private val taskDao: TaskDao
+    private val taskDao: TaskDao,
+    private val context: Context
 ) {
     // Get all routines with their tasks as a Flow
     fun getAllRoutinesWithTasks(): Flow<List<Routine>> {
@@ -55,6 +61,22 @@ class RoutineRepository(
             )
             taskDao.insertTask(taskEntity)
         }
+
+        updateAchievementsAfterRoutineChange()
+    }
+
+    private suspend fun updateAchievementsAfterRoutineChange() {
+        val application = context as? Application ?: return
+        val achievementRepository = (application as? RMApplication)?.achievementRepository ?: return
+        val routineCount = routineDao.getAllRoutinesAsFlow().first().size
+
+        val reminderManager = ReminderManager(context)
+        val consecutiveDays = reminderManager.getConsecutiveDays()
+
+
+        achievementRepository.checkFirstRoutineAchievement(routineCount)
+        achievementRepository.checkConsistencyAchievement(consecutiveDays)
+        achievementRepository.checkOrganizationProAchievement(routineCount)
     }
 
     // Update an existing routine and its tasks

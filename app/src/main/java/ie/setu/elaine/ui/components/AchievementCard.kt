@@ -17,7 +17,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import ie.setu.elaine.model.Achievement
 import ie.setu.elaine.R
-//TODO change how it 'wraps' achievement
 
 @Composable
 fun AchievementCard(achievement: Achievement){

@@ -1,6 +1,7 @@
 package ie.setu.elaine.viewmodel
 
 import android.app.Application
+import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -49,9 +50,13 @@ open class RoutineViewModel(application: Application) : AndroidViewModel(applica
     private var routineTimerJob: Job? = null
     private var taskTimerJob: Job? = null
 
+    private val context = getApplication<Application>().applicationContext
+
     init {
         val database = AppDatabase.getDatabase(application)
-        repository = RoutineRepository(database.routineDao(), database.taskDao())
+        repository = RoutineRepository(
+            database.routineDao(), database.taskDao(), context
+        )
         taskRepository = TaskRepository(database.taskDao())
 
         // Load routines when ViewModel is initialized
