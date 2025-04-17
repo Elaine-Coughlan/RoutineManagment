@@ -1,27 +1,18 @@
-package ie.setu.elaine
+package ie.setu.elaine.notifications
 
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.work.ListenableWorker
-import androidx.work.testing.TestListenableWorkerBuilder
-import ie.setu.elaine.notifications.DailyReminderWorker
-import ie.setu.elaine.notifications.NotificationHelper
-import org.junit.Assert.assertEquals
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.any
 import org.mockito.Mock
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
+import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 import java.util.concurrent.TimeUnit
-
-
 
 @RunWith(AndroidJUnit4::class)
 class DailyReminderWorkerTest{
@@ -52,16 +43,16 @@ class DailyReminderWorkerTest{
         val worker = TestWorker(context, notificationHelper)
         val result = worker.doTestWork()
 
-        verify(notificationHelper).showDailyReminder()
-        assertEquals(ListenableWorker.Result.success(), result)
+        Mockito.verify(notificationHelper).showDailyReminder()
+        Assert.assertEquals(ListenableWorker.Result.success(), result)
     }
 
 
 }
 
 private class TestWorker(
-   private val context: Context,
-   private val helper: NotificationHelper
+    private val context: Context,
+    private val helper: NotificationHelper
 ) {
     fun doTestWork() : ListenableWorker.Result {
         val sharedPrefs = context.getSharedPreferences(DailyReminderWorker.PREF_NAME, Context.MODE_PRIVATE)
@@ -78,4 +69,3 @@ private class TestWorker(
 
 
 }
-

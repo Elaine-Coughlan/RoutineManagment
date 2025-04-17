@@ -11,7 +11,7 @@ class DailyReminderWorker(
 ) : Worker(context, workerParams) {
 
     companion object {
-        const val PREF_NAME = "elaine_app_prefs"
+        const val PREF_NAME = "app_prefs"
         const val LAST_OPENED_KEY = "last_app_open_time"
     }
 

@@ -22,6 +22,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -46,6 +51,13 @@ fun TimerScreen(
 
     val iconRes = if (isTaskTimerRunning) R.drawable.video_pause_button else R.drawable.video_play_button
 
+    // Debug state to track button presses
+    var lastAction by remember { mutableStateOf("None") }
+
+    // Track and log pause/resume actions
+    LaunchedEffect(isTaskTimerRunning) {
+        println("Timer running state changed: $isTaskTimerRunning")
+    }
 
     Scaffold(
         topBar = {
@@ -93,8 +105,12 @@ fun TimerScreen(
                 IconButton(
                     onClick = {
                         if (isTaskTimerRunning) {
+                            lastAction = "Pause pressed"
+                            println("Pause button clicked")
                             viewModel.pauseTimer()
                         } else {
+                            lastAction = "Resume pressed"
+                            println("Resume button clicked")
                             viewModel.resumeTimer()
                         }
                     },
@@ -107,14 +123,11 @@ fun TimerScreen(
                     )
                 }
 
-                // Reset button
                 IconButton(
                     onClick = {
-                        currentRoutine?.id?.let { routineId ->
-                            currentTask?.id?.let { taskId ->
-                                viewModel.startTaskTimer(routineId, taskId)
-                            }
-                        }
+                        lastAction = "Reset pressed"
+                        println("Reset button clicked")
+                        viewModel.resetTaskTimer() // New method that resets without starting
                     },
                     modifier = Modifier.size(64.dp)
                 ) {
@@ -134,7 +147,10 @@ fun TimerScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Button(
-                    onClick = { viewModel.moveToPreviousTask() },
+                    onClick = {
+                        lastAction = "Previous task"
+                        viewModel.moveToPreviousTask()
+                    },
                     enabled = currentRoutine?.tasks?.indexOf(currentTask) ?: 0 > 0
                 ) {
                     Icon(Icons.Default.ArrowBack, contentDescription = "Previous Task")
@@ -143,7 +159,10 @@ fun TimerScreen(
                 }
 
                 Button(
-                    onClick = { viewModel.moveToNextTask() },
+                    onClick = {
+                        lastAction = "Next task"
+                        viewModel.moveToNextTask()
+                    },
                     enabled = (currentRoutine?.tasks?.indexOf(currentTask) ?: 0) <
                             (currentRoutine?.tasks?.size ?: 1) - 1
                 ) {

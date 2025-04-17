@@ -1,7 +1,6 @@
 package ie.setu.elaine.viewmodel
 
 import android.app.Application
-import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -14,17 +13,18 @@ import ie.setu.elaine.data.repository.RoutineRepository
 import ie.setu.elaine.data.repository.TaskRepository
 import ie.setu.elaine.model.Routine
 import ie.setu.elaine.model.Task
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-open class RoutineViewModel(application: Application) : AndroidViewModel(application) {
+class RoutineViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: RoutineRepository
     private val taskRepository: TaskRepository
 
+    // Timer ViewModels
+    private val taskTimerViewModel = TimerViewModel()
+    private val routineTimerViewModel = TimerViewModel()
+
     private val _routines = mutableStateListOf<Routine>()
-    open val routines: List<Routine> = _routines
+    val routines: List<Routine> = _routines
 
     // Current states for editing
     private val _currentRoutine = mutableStateOf<Routine?>(null)
@@ -33,22 +33,11 @@ open class RoutineViewModel(application: Application) : AndroidViewModel(applica
     private val _currentTask = mutableStateOf<Task?>(null)
     val currentTask: State<Task?> = _currentTask
 
-    // Timer states
-    private val _isRoutineTimerRunning = mutableStateOf(false)
-    val isRoutineTimerRunning: State<Boolean> = _isRoutineTimerRunning
-
-    private val _currentTaskTimerRunning = mutableStateOf(false)
-    val currentTaskTimerRunning: State<Boolean> = _currentTaskTimerRunning
-
-    private val _remainingRoutineTimeInSeconds = mutableStateOf(0)
-    val remainingRoutineTimeInSeconds: State<Int> = _remainingRoutineTimeInSeconds
-
-    private val _remainingTaskTimeInSeconds = mutableStateOf(0)
-    val remainingTaskTimeInSeconds: State<Int> = _remainingTaskTimeInSeconds
-
-    // Jobs for timer coroutines
-    private var routineTimerJob: Job? = null
-    private var taskTimerJob: Job? = null
+    // Timer states - forwarded from timer view models
+    val isRoutineTimerRunning: State<Boolean> = routineTimerViewModel.isTimerRunning
+    val currentTaskTimerRunning: State<Boolean> = taskTimerViewModel.isTimerRunning
+    val remainingRoutineTimeInSeconds: State<Int> = routineTimerViewModel.remainingTimeInSeconds
+    val remainingTaskTimeInSeconds: State<Int> = taskTimerViewModel.remainingTimeInSeconds
 
     private val context = getApplication<Application>().applicationContext
 
@@ -105,36 +94,25 @@ open class RoutineViewModel(application: Application) : AndroidViewModel(applica
     fun startRoutineTimer(routineId: String) {
         val routine = _routines.find { it.id == routineId } ?: return
 
-        //Debugging
-        println("Starting routine timer for routine: $routineId") // Add this log
+        println("Starting routine timer for routine: $routineId")
         println("Found routine: ${routine.title} with ${routine.tasks.size} tasks")
 
-
         _currentRoutine.value = routine
-        _remainingRoutineTimeInSeconds.value = calculateTotalRoutineTimeInSeconds(routine)
-        _isRoutineTimerRunning.value = true
+
+        // Calculate total routine time
+        val totalTime = calculateTotalRoutineTimeInSeconds(routine)
+
+        // Start routine timer
+        routineTimerViewModel.startTimer(totalTime) {
+            // Callback when routine timer completes
+            completeRoutine()
+        }
 
         // Start with the first task if available
         if (routine.tasks.isNotEmpty()) {
             _currentTask.value = routine.tasks.first()
-            _remainingTaskTimeInSeconds.value = getTaskDurationInSeconds(_currentTask.value)
-            _currentTaskTimerRunning.value = true
+            startTaskTimer(routineId, routine.tasks.first().id)
         }
-
-        // Start routine timer
-        routineTimerJob = viewModelScope.launch {
-            while (_remainingRoutineTimeInSeconds.value > 0 && isActive) {
-                delay(1000)
-                _remainingRoutineTimeInSeconds.value -= 1
-            }
-
-            if (_remainingRoutineTimeInSeconds.value <= 0) {
-                completeRoutine()
-            }
-        }
-
-        // Start task timer
-        startTaskTimer(routineId, routine.tasks.firstOrNull()?.id ?: "")
     }
 
     fun startTaskTimer(routineId: String, taskId: String) {
@@ -143,24 +121,23 @@ open class RoutineViewModel(application: Application) : AndroidViewModel(applica
 
         _currentRoutine.value = routine
         _currentTask.value = task
-        _remainingTaskTimeInSeconds.value = getTaskDurationInSeconds(task)
-        _currentTaskTimerRunning.value = true
 
-        taskTimerJob?.cancel()
-        taskTimerJob = viewModelScope.launch {
-            while (_remainingTaskTimeInSeconds.value > 0 && isActive) {
-                delay(1000)
-                _remainingTaskTimeInSeconds.value -= 1
-            }
-
-            if (_remainingTaskTimeInSeconds.value <= 0) {
-                completeTask()
-            }
+        // Start task timer
+        val taskDuration = getTaskDurationInSeconds(task)
+        taskTimerViewModel.startTimer(taskDuration) {
+            // Callback when task timer completes
+            completeTask()
         }
     }
 
-    // Helper to get task duration in seconds, preferring durationInSeconds field
-    // but calculating from minutes if needed
+    // Reset the current task timer without starting it
+    fun resetTaskTimer() {
+        // Just reset the timer to original duration without starting
+        taskTimerViewModel.resetTimer()
+        println("Task timer reset to original duration (not started)")
+    }
+
+    // Helper to get task duration in seconds
     private fun getTaskDurationInSeconds(task: Task?): Int {
         if (task == null) return 0
         return if (task.durationInSeconds > 0) {
@@ -175,21 +152,15 @@ open class RoutineViewModel(application: Application) : AndroidViewModel(applica
     }
 
     private fun completeTask() {
-        _currentTaskTimerRunning.value = false
-
         // Move to next task if available
         val currentTaskIndex = _currentRoutine.value?.tasks?.indexOfFirst {
             it.id == _currentTask.value?.id
         } ?: -1
 
-        if (currentTaskIndex >= 0 && currentTaskIndex < (_currentRoutine.value?.tasks?.size
-                ?: 0) - 1
-        ) {
+        if (currentTaskIndex >= 0 && currentTaskIndex < (_currentRoutine.value?.tasks?.size ?: 0) - 1) {
             // Move to next task
             val nextTask = _currentRoutine.value?.tasks?.get(currentTaskIndex + 1)
             _currentTask.value = nextTask
-            _remainingTaskTimeInSeconds.value = getTaskDurationInSeconds(nextTask)
-            _currentTaskTimerRunning.value = true
             nextTask?.let { task ->
                 _currentRoutine.value?.id?.let { routineId ->
                     startTaskTimer(routineId, task.id)
@@ -202,42 +173,21 @@ open class RoutineViewModel(application: Application) : AndroidViewModel(applica
     }
 
     private fun completeRoutine() {
-        _isRoutineTimerRunning.value = false
-        _currentTaskTimerRunning.value = false
-        routineTimerJob?.cancel()
-        taskTimerJob?.cancel()
+        // Stop all timers
+        taskTimerViewModel.stopTimer()
+        routineTimerViewModel.stopTimer()
     }
 
     fun pauseTimer() {
-        _isRoutineTimerRunning.value = false
-        _currentTaskTimerRunning.value = false
-        routineTimerJob?.cancel()
-        taskTimerJob?.cancel()
+        // Pause both timers
+        taskTimerViewModel.pauseTimer()
+        routineTimerViewModel.pauseTimer()
     }
 
     fun resumeTimer() {
-        if (_currentTask.value != null) {
-            _currentTaskTimerRunning.value = true
-            _isRoutineTimerRunning.value = true
-
-            _currentRoutine.value?.id?.let { routineId ->
-                _currentTask.value?.id?.let { taskId ->
-                    startTaskTimer(routineId, taskId)
-                }
-            }
-
-            // Restart the routine timer
-            routineTimerJob = viewModelScope.launch {
-                while (_remainingRoutineTimeInSeconds.value > 0 && isActive) {
-                    delay(1000)
-                    _remainingRoutineTimeInSeconds.value -= 1
-                }
-
-                if (_remainingRoutineTimeInSeconds.value <= 0) {
-                    completeRoutine()
-                }
-            }
-        }
+        // Resume both timers
+        taskTimerViewModel.resumeTimer()
+        routineTimerViewModel.resumeTimer()
     }
 
     fun moveToNextTask() {
@@ -245,11 +195,12 @@ open class RoutineViewModel(application: Application) : AndroidViewModel(applica
             _currentRoutine.value?.let { routine ->
                 val currentIndex = routine.tasks.indexOfFirst { it.id == currentTask.id }
                 if (currentIndex < routine.tasks.size - 1) {
-                    taskTimerJob?.cancel()
+                    // Stop current task timer
+                    taskTimerViewModel.stopTimer()
+
+                    // Move to next task
                     val nextTask = routine.tasks[currentIndex + 1]
                     _currentTask.value = nextTask
-                    _remainingTaskTimeInSeconds.value = getTaskDurationInSeconds(nextTask)
-                    _currentTaskTimerRunning.value = true
                     startTaskTimer(routine.id, nextTask.id)
                 }
             }
@@ -261,11 +212,12 @@ open class RoutineViewModel(application: Application) : AndroidViewModel(applica
             _currentRoutine.value?.let { routine ->
                 val currentIndex = routine.tasks.indexOfFirst { it.id == currentTask.id }
                 if (currentIndex > 0) {
-                    taskTimerJob?.cancel()
+                    // Stop current task timer
+                    taskTimerViewModel.stopTimer()
+
+                    // Move to previous task
                     val prevTask = routine.tasks[currentIndex - 1]
                     _currentTask.value = prevTask
-                    _remainingTaskTimeInSeconds.value = getTaskDurationInSeconds(prevTask)
-                    _currentTaskTimerRunning.value = true
                     startTaskTimer(routine.id, prevTask.id)
                 }
             }
@@ -274,8 +226,9 @@ open class RoutineViewModel(application: Application) : AndroidViewModel(applica
 
     override fun onCleared() {
         super.onCleared()
-        routineTimerJob?.cancel()
-        taskTimerJob?.cancel()
+        // Clean up timer resources
+        taskTimerViewModel.stopTimer()
+        routineTimerViewModel.stopTimer()
     }
 }
 

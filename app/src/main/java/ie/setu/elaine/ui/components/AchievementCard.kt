@@ -3,6 +3,7 @@ package ie.setu.elaine.ui.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
@@ -17,11 +18,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import ie.setu.elaine.model.Achievement
 import ie.setu.elaine.R
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
-fun AchievementCard(achievement: Achievement){
+fun AchievementCard(achievement: ie.setu.elaine.data.local.entity.Achievement) {
     Card(
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        modifier = Modifier.fillMaxSize()
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -40,7 +45,18 @@ fun AchievementCard(achievement: Achievement){
             Spacer(modifier = Modifier.height(8.dp))
 
             if (achievement.isUnlocked) {
-                Icon(//TODO custom trophies
+                achievement.unlockedDate?.let { date ->
+                    val formattedDate = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
+                        .format(Date(date))
+
+                    Text(
+                        text = "Unlocked on $formattedDate",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                Icon(
                     painter = painterResource(R.drawable.outline_trophy_24),
                     contentDescription = "Unlocked",
                     tint = MaterialTheme.colorScheme.primary,
