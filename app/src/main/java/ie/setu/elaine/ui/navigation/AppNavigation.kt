@@ -11,6 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import ie.setu.elaine.ui.components.SplashScreen
 import ie.setu.elaine.ui.screen.achievement.AchievementScreen
+import ie.setu.elaine.ui.screen.achievement.StreakScreen
 import ie.setu.elaine.ui.screen.routine.EditRoutineScreen
 import ie.setu.elaine.ui.screen.routine.RoutineDetailScreen
 import ie.setu.elaine.ui.screen.routine.RoutineListScreen
@@ -63,9 +64,11 @@ fun AppNavigation() {
                 onAddRoutineClick = {
                     navController.navigate("editRoutine")
                 },
-
                 onAchievementsClick = {
                     navController.navigate("achievements")
+                },
+                onProgressClick = { routineId ->
+                    navController.navigate("streakProgress/$routineId")
                 }
             )
         }
@@ -153,6 +156,18 @@ fun AppNavigation() {
                 onNavigateBack = {
                     navController.popBackStack()
                 }
+            )
+        }
+
+        composable(
+            route = "streakProgress/{routineId}",
+            arguments = listOf(navArgument("routineId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val routineId = backStackEntry.arguments?.getString("routineId") ?: ""
+            StreakScreen(
+                routineId = routineId,
+                viewModel = viewModel,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 

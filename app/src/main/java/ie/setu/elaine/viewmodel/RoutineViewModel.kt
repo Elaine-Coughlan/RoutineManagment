@@ -10,14 +10,22 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import ie.setu.elaine.data.local.AppDatabase
 import ie.setu.elaine.data.repository.RoutineRepository
+import ie.setu.elaine.data.repository.StreakRepository
 import ie.setu.elaine.data.repository.TaskRepository
+import ie.setu.elaine.model.CompletionRecord
 import ie.setu.elaine.model.Routine
+import ie.setu.elaine.model.Streak
 import ie.setu.elaine.model.Task
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 class RoutineViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: RoutineRepository
     private val taskRepository: TaskRepository
+    private val streakRepository: StreakRepository
 
     // Timer ViewModels
     private val taskTimerViewModel = TimerViewModel()
@@ -39,6 +47,16 @@ class RoutineViewModel(application: Application) : AndroidViewModel(application)
     val remainingRoutineTimeInSeconds: State<Int> = routineTimerViewModel.remainingTimeInSeconds
     val remainingTaskTimeInSeconds: State<Int> = taskTimerViewModel.remainingTimeInSeconds
 
+    // Streak tracking
+    private val _currentStreak = mutableStateOf<Streak?>(null)
+    val currentStreak: State<Streak?> = _currentStreak
+
+    private val _completionRecords = mutableStateListOf<CompletionRecord>()
+    val completionRecords: List<CompletionRecord> = _completionRecords
+
+    private val _streakSaverAvailable = mutableStateOf(false)
+    val streakSaverAvailable: State<Boolean> = _streakSaverAvailable
+
     private val context = getApplication<Application>().applicationContext
 
     init {
@@ -47,6 +65,9 @@ class RoutineViewModel(application: Application) : AndroidViewModel(application)
             database.routineDao(), database.taskDao(), context
         )
         taskRepository = TaskRepository(database.taskDao())
+        streakRepository = StreakRepository(
+            database.streakDao(), database.completionRecordDao(), context
+        )
 
         // Load routines when ViewModel is initialized
         viewModelScope.launch {
@@ -61,6 +82,8 @@ class RoutineViewModel(application: Application) : AndroidViewModel(application)
     fun addRoutine(routine: Routine) {
         viewModelScope.launch {
             repository.insertRoutine(routine)
+            // Initialize streak for the new routine with default 30-day goal
+            streakRepository.updateStreakGoal(routine.id, 30)
         }
     }
 
@@ -105,7 +128,7 @@ class RoutineViewModel(application: Application) : AndroidViewModel(application)
         // Start routine timer
         routineTimerViewModel.startTimer(totalTime) {
             // Callback when routine timer completes
-            completeRoutine()
+            completeRoutine(routine.id)
         }
 
         // Start with the first task if available
@@ -168,14 +191,22 @@ class RoutineViewModel(application: Application) : AndroidViewModel(application)
             }
         } else {
             // End of routine
-            completeRoutine()
+            _currentRoutine.value?.id?.let { routineId ->
+                completeRoutine(routineId)
+            }
         }
     }
 
-    private fun completeRoutine() {
+    private fun completeRoutine(routineId: String) {
         // Stop all timers
         taskTimerViewModel.stopTimer()
         routineTimerViewModel.stopTimer()
+
+        // Mark routine as completed for streak tracking
+        viewModelScope.launch {
+            streakRepository.markRoutineAsCompleted(routineId)
+            loadStreakData(routineId)
+        }
     }
 
     fun pauseTimer() {
@@ -220,6 +251,39 @@ class RoutineViewModel(application: Application) : AndroidViewModel(application)
                     _currentTask.value = prevTask
                     startTaskTimer(routine.id, prevTask.id)
                 }
+            }
+        }
+    }
+
+    // New Streak tracking functions
+    fun loadStreakData(routineId: String) {
+        viewModelScope.launch {
+            // Load streak data for the selected routine
+            streakRepository.getStreakForRoutine(routineId)?.let { streak ->
+                _currentStreak.value = streak
+                _streakSaverAvailable.value = streak.canUseStreakSaver()
+            }
+
+            // Load completion records
+            streakRepository.getCompletionRecordsForRoutineAsFlow(routineId).collectLatest { records ->
+                _completionRecords.clear()
+                _completionRecords.addAll(records)
+            }
+        }
+    }
+
+    fun updateStreakGoal(routineId: String, newGoal: Int) {
+        viewModelScope.launch {
+            streakRepository.updateStreakGoal(routineId, newGoal)
+            loadStreakData(routineId)
+        }
+    }
+
+    fun useStreakSaver(routineId: String) {
+        viewModelScope.launch {
+            val success = streakRepository.useStreakSaver(routineId)
+            if (success) {
+                loadStreakData(routineId)
             }
         }
     }

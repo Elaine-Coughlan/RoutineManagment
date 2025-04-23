@@ -33,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import ie.setu.elaine.model.Routine
 import ie.setu.elaine.viewmodel.RoutineViewModel
 import ie.setu.elaine.R
-//TODO continue here
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoutineListScreen(
@@ -41,6 +40,7 @@ fun RoutineListScreen(
     onRoutineClick: (String) -> Unit,
     onAddRoutineClick: () -> Unit,
     onAchievementsClick: () -> Unit,
+    onProgressClick: (String) -> Unit, // Updated to accept routineId
 ) {
     val routines = viewModel.routines
 
@@ -59,6 +59,8 @@ fun RoutineListScreen(
                             contentDescription = "Achievements"
                         )
                     }
+
+                    // Removed the progress button from top bar
                 }
             )
         }
@@ -72,7 +74,8 @@ fun RoutineListScreen(
             items(routines) { routine ->
                 RoutineCard(
                     routine = routine,
-                    onClick = { onRoutineClick(routine.id) }
+                    onClick = { onRoutineClick(routine.id) },
+                    onProgressClick = { onProgressClick(routine.id) }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -83,7 +86,8 @@ fun RoutineListScreen(
 @Composable
 fun RoutineCard(
     routine: Routine,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onProgressClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -113,15 +117,16 @@ fun RoutineCard(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = "${routine.tasks.size} tasks",
                     style = MaterialTheme.typography.labelSmall
                 )
 
-                if (routine.isTimerEnabled) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (routine.isTimerEnabled) {
                         Icon(
                             painter = painterResource(R.drawable.sand_clock),
                             contentDescription = "Timer",
@@ -132,6 +137,19 @@ fun RoutineCard(
                         Text(
                             text = "${routine.totalDurationMinutes} min",
                             style = MaterialTheme.typography.labelSmall
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                    }
+
+                    // Progress button
+                    IconButton(
+                        onClick = onProgressClick,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.sharp_query_stats_24),
+                            contentDescription = "View Progress",
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 }

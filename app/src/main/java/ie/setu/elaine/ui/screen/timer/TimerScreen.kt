@@ -94,6 +94,14 @@ fun TimerScreen(
                 modifier = Modifier.padding(vertical = 48.dp)
             )
 
+            //TODO remove - Debug info
+            Text(
+                text = "Last action: $lastAction | Timer running: $isTaskTimerRunning",
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+
             // Timer controls
             Row(
                 horizontalArrangement = Arrangement.SpaceEvenly,
