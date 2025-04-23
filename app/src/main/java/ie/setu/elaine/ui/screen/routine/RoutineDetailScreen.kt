@@ -17,9 +17,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
@@ -38,6 +41,10 @@ import ie.setu.elaine.model.Task
 import ie.setu.elaine.viewmodel.RoutineViewModel
 import ie.setu.elaine.R
 
+/**
+ * Screen that displays details of a single routine and its tasks.
+ * Allows starting the routine timer or marking it complete manually.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoutineDetailScreen(
@@ -106,15 +113,34 @@ fun RoutineDetailScreen(
                                 text = "Total time: ${routine.totalDurationMinutes} min",
                                 style = MaterialTheme.typography.bodyMedium
                             )
-
-                            if (routine.isTimerEnabled) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            // Action buttons row
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
                                 Button(
-                                    onClick = { viewModel.startRoutineTimer(routineId)
-                                        onStartRoutine()}
+                                    onClick = {
+                                        viewModel.manuallyCompleteRoutine(routineId)
+                                    },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 ) {
-                                    Icon(Icons.Default.PlayArrow, contentDescription = "Start")
+                                    Icon(Icons.Default.CheckCircle, contentDescription = "")
                                     Spacer(modifier = Modifier.width(4.dp))
-                                    Text("Start Routine")
+                                }
+
+                                // Show the Start button if timer is enabled
+                                if (routine.isTimerEnabled) {
+                                    Button(
+                                        onClick = {
+                                            viewModel.startRoutineTimer(routineId)
+                                            onStartRoutine()
+                                        }
+                                    ) {
+                                        Icon(Icons.Default.PlayArrow, contentDescription = "Start")
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                    }
                                 }
                             }
                         }
@@ -150,6 +176,9 @@ fun RoutineDetailScreen(
     }
 }
 
+/**
+ * Composable for displaying a single task item in the routine detail screen.
+ */
 @Composable
 fun TaskItem(
     task: Task,

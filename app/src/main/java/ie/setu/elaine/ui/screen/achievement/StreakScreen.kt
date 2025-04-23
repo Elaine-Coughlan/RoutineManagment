@@ -12,11 +12,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import ie.setu.elaine.data.local.entity.Milestone
 import ie.setu.elaine.model.Streak
 import ie.setu.elaine.ui.components.StreakCalendarView
 import ie.setu.elaine.ui.components.StreakProgressCard
 import ie.setu.elaine.viewmodel.RoutineViewModel
 
+/**
+ * Screen that displays streak information for a specific routine
+ *
+ * This screen shows the user's current streak, milestones, and a calendar view of
+ * completion records for a selected routine.
+ *
+ * @param routineId The ID of the routine to display streak information for
+ * @param viewModel The view model containing routine and streak data
+ * @param onNavigateBack Callback function to handle navigation back to previous screen
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StreakScreen(
@@ -24,15 +35,18 @@ fun StreakScreen(
     viewModel: RoutineViewModel,
     onNavigateBack: () -> Unit
 ) {
+    // Find the current routine based on the provided ID
     val currentRoutine by remember { mutableStateOf(viewModel.routines.find { it.id == routineId }) }
+    // Observe streak and completion data from the view model
     val streak by viewModel.currentStreak
     val completionRecords = viewModel.completionRecords
 
-    // Load streak data when screen is shown
+    // Load streak data when the screen is displayed
     LaunchedEffect(routineId) {
         viewModel.loadStreakData(routineId)
     }
 
+    // Main scaffold layout with top app bar
     Scaffold(
         topBar = {
             TopAppBar(
@@ -48,13 +62,16 @@ fun StreakScreen(
             )
         }
     ) { paddingValues ->
+        // Scrollable column of streak information cards
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
         ) {
+            // Only show content when streak data is available
             if (streak != null) {
+                // Display current streak progress and actions
                 StreakProgressCard(
                     streak = streak!!,
                     onUseStreakSaver = {
@@ -67,7 +84,7 @@ fun StreakScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Streak milestones and achievements
+                // Card displaying milestone achievements
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -87,13 +104,14 @@ fun StreakScreen(
 
                         Spacer(modifier = Modifier.height(8.dp))
 
+                        // List of milestone items with achievement status
                         MilestonesList(streak = streak!!)
                     }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Calendar view of completions
+                // Calendar view showing completion history
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -105,6 +123,7 @@ fun StreakScreen(
                     )
                 }
             } else {
+                // Show loading indicator when streak data is not yet available
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -116,9 +135,14 @@ fun StreakScreen(
     }
 }
 
+/**
+ * Composable that renders a list of milestone achievements
+ *
+ * @param streak The current streak data used to determine which milestones are achieved
+ */
 @Composable
 fun MilestonesList(streak: Streak) {
-    // Common habit formation milestones
+    // Define standard habit formation milestones with day counts and descriptions
     val milestones = listOf(
         Milestone(7, "One Week Streak", "Completed 7 consecutive days"),
         Milestone(21, "Habit Forming", "21 days is a great start for habit formation"),
@@ -127,6 +151,7 @@ fun MilestonesList(streak: Streak) {
         Milestone(100, "Century Club", "Triple digits achievement")
     )
 
+    // Display each milestone with appropriate styling based on achievement status
     Column {
         milestones.forEach { milestone ->
             MilestoneItem(
@@ -139,6 +164,12 @@ fun MilestonesList(streak: Streak) {
     }
 }
 
+/**
+ * Individual milestone display item
+ *
+ * @param milestone The milestone data to display
+ * @param isAchieved Boolean indicating if the milestone has been achieved
+ */
 @Composable
 fun MilestoneItem(
     milestone: Milestone,
@@ -148,6 +179,7 @@ fun MilestoneItem(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Star icon with different styling based on achievement status
         Icon(
             imageVector = if (isAchieved) {
                 Icons.Filled.Star
@@ -165,6 +197,7 @@ fun MilestoneItem(
 
         Spacer(modifier = Modifier.width(16.dp))
 
+        // Milestone text information
         Column {
             Text(
                 text = milestone.title,
@@ -186,6 +219,7 @@ fun MilestoneItem(
 
         Spacer(modifier = Modifier.weight(1f))
 
+        // Day count with different styling based on achievement status
         Text(
             text = "${milestone.days} days",
             style = MaterialTheme.typography.bodyMedium,
@@ -199,8 +233,3 @@ fun MilestoneItem(
     }
 }
 
-data class Milestone(
-    val days: Int,
-    val title: String,
-    val description: String
-)

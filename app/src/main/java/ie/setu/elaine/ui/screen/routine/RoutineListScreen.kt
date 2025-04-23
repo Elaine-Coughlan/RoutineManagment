@@ -33,6 +33,17 @@ import androidx.compose.ui.unit.dp
 import ie.setu.elaine.model.Routine
 import ie.setu.elaine.viewmodel.RoutineViewModel
 import ie.setu.elaine.R
+
+/**
+ * Screen that displays a list of all routines.
+ * This is the main entry point for the routine feature.
+ *
+ * @param viewModel RoutineViewModel for accessing routine data
+ * @param onRoutineClick Callback for when a routine is clicked
+ * @param onAddRoutineClick Callback for when the add routine button is clicked
+ * @param onAchievementsClick Callback for when the achievements button is clicked
+ * @param onProgressClick Callback for when a routine's progress button is clicked
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoutineListScreen(
@@ -40,7 +51,7 @@ fun RoutineListScreen(
     onRoutineClick: (String) -> Unit,
     onAddRoutineClick: () -> Unit,
     onAchievementsClick: () -> Unit,
-    onProgressClick: (String) -> Unit, // Updated to accept routineId
+    onProgressClick: (String) -> Unit, // Accepts routineId
 ) {
     val routines = viewModel.routines
 
@@ -49,22 +60,23 @@ fun RoutineListScreen(
             TopAppBar(
                 title = { Text("Daily Routines") },
                 actions = {
+                    // Add routine button
                     IconButton(onClick = onAddRoutineClick) {
                         Icon(Icons.Default.Add, contentDescription = "Add Routine")
                     }
 
+                    // Achievements button
                     IconButton(onClick = onAchievementsClick) {
                         Icon(
                             painter = painterResource(R.drawable.outline_trophy_24),
                             contentDescription = "Achievements"
                         )
                     }
-
-                    // Removed the progress button from top bar
                 }
             )
         }
     ) { padding ->
+        // List of routines
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -83,6 +95,13 @@ fun RoutineListScreen(
     }
 }
 
+/**
+ * Composable for displaying a single routine card in the list.
+ *
+ * @param routine The routine to display
+ * @param onClick Callback for when the card is clicked
+ * @param onProgressClick Callback for when the progress button is clicked
+ */
 @Composable
 fun RoutineCard(
     routine: Routine,
@@ -100,11 +119,13 @@ fun RoutineCard(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
+            // Routine title
             Text(
                 text = routine.title,
                 style = MaterialTheme.typography.headlineSmall
             )
 
+            // Optional description
             if (routine.description.isNotEmpty()) {
                 Text(
                     text = routine.description,
@@ -115,17 +136,20 @@ fun RoutineCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            // Footer row with task count, timer info, and progress button
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Task count
                 Text(
                     text = "${routine.tasks.size} tasks",
                     style = MaterialTheme.typography.labelSmall
                 )
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Timer info (if enabled)
                     if (routine.isTimerEnabled) {
                         Icon(
                             painter = painterResource(R.drawable.sand_clock),
